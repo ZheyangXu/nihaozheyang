@@ -1,3 +1,8 @@
+node_modules/
+dist/
+.idea/
+.vscode/
+*.log
 # Logs
 logs
 *.log
