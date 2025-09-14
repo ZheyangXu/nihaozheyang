@@ -43,17 +43,7 @@ jobs:
           source: "dist/**"
           target: "/tmp/nihaozheyang_build"
 
-      - name: Upload nginx config to remote server (SCP)
-        uses: appleboy/scp-action@v0.1.6
-        with:
-          host: ${{ secrets.SSH_HOST }}
-          username: ${{ secrets.SSH_USER }}
-          key: ${{ secrets.SSH_KEY }}
-          port: ${{ secrets.SSH_PORT }}
-          source: "deploy/nginx/nihaozheyang.conf"
-          target: "/tmp/nihaozheyang_nginx.conf"
-
-      - name: Deploy on remote server: copy site and install nginx config
+      - name: Deploy on remote server and reload nginx
         uses: appleboy/ssh-action@v0.1.6
         with:
           host: ${{ secrets.SSH_HOST }}
@@ -61,48 +51,13 @@ jobs:
           key: ${{ secrets.SSH_KEY }}
           port: ${{ secrets.SSH_PORT }}
           script: |
-            set -euo pipefail
-            echo "Preparing target path"
-            sudo mkdir -p "${{ env.TARGET_PATH }}"
-            sudo rm -rf "${{ env.TARGET_PATH }}/*"
-            sudo cp -r /tmp/nihaozheyang_build/* "${{ env.TARGET_PATH }}/"
-
-            # Install nginx config safely
-            NGINX_AVAILABLE=/etc/nginx/sites-available
-            NGINX_ENABLED=/etc/nginx/sites-enabled
-            NAME=nihaozheyang.conf
-            TMP_CONF=/tmp/nihaozheyang_nginx.conf
-
-            sudo mkdir -p "$NGINX_AVAILABLE" "$NGINX_ENABLED"
-            if [ -f "$NGINX_AVAILABLE/$NAME" ]; then
-              echo "Backing up existing nginx config"
-              sudo cp -a "$NGINX_AVAILABLE/$NAME" "$NGINX_AVAILABLE/$NAME.bak.$(date +%s)" || true
-            fi
-            echo "Moving new nginx config into place"
-            sudo mv "$TMP_CONF" "$NGINX_AVAILABLE/$NAME"
-            sudo chmod 644 "$NGINX_AVAILABLE/$NAME"
-
-            # Ensure symlink in sites-enabled
-            if [ -L "$NGINX_ENABLED/$NAME" ]; then
-              sudo rm "$NGINX_ENABLED/$NAME"
-            fi
-            sudo ln -sf "$NGINX_AVAILABLE/$NAME" "$NGINX_ENABLED/$NAME"
-
-            # Test nginx config before reloading
-            if sudo nginx -t; then
-              echo "nginx config OK — reloading"
-              if command -v systemctl >/dev/null 2>&1; then
-                sudo systemctl reload nginx || sudo systemctl restart nginx
-              else
-                sudo nginx -s reload || true
-              fi
+            sudo mkdir -p ${{ env.TARGET_PATH }}
+            sudo rm -rf ${{ env.TARGET_PATH }}/*
+            sudo cp -r /tmp/nihaozheyang_build/* ${{ env.TARGET_PATH }}/
+            # reload nginx (try systemctl first, fallback to nginx -s reload)
+            if command -v systemctl >/dev/null 2>&1; then
+              sudo systemctl reload nginx || sudo systemctl restart nginx
             else
-              echo "nginx config test failed — restoring backup and exiting"
-              # Try to restore backup if one exists
-              if [ -f "$NGINX_AVAILABLE/$NAME.bak" ]; then
-                sudo mv "$NGINX_AVAILABLE/$NAME.bak" "$NGINX_AVAILABLE/$NAME" || true
-              fi
-              exit 1
+              sudo nginx -s reload || true
             fi
-
             sudo rm -rf /tmp/nihaozheyang_build || true
