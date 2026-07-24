@@ -59,6 +59,22 @@ AMP 的设计逻辑围绕非结构化运动数据驱动，对抗模仿学习，�
 
 ![alt text](../public/projects/luwu/amp-psude-code.png)
 
+Equation 7:
+
+$$
+r(s_t, s_{t+1}) = max[0, 1 - 0.25(D(s_t, s_{t+1}) - 1)^2]
+$$
+
+Equation 8:
+
+$$
+\begin{align}
+\argmin_{D} \mathbb{E}_d^M(s, s^{\prime})[(D(\Phi(s), \Phi(s^{\prime})) - 1)^2] + \\ 
+\mathbb{E}_d^{\pi}(s, s^{\prime})[(D(\Phi(s), \Phi(s^{\prime})) + 1)^2] + \\
+\frac{w^{GP}}{2} \cdot \mathbb{E}_{d^{M}(s, s^{\prime})}[\lVert \nabla_{\phi} D(\phi)\lvert_{\phi = (\Phi(s), \Phi(s^{\prime}))} \rVert_2^2]
+\end{align}
+$$
+
 #### 数据预处理
 
 * **数据采集**：收集多样化原始运动数据，来源包括人类动作捕捉(mocap)数据、艺术家关键帧动画、机器人轨迹优化结果等。数据形式为状态序列，包含关节角度、根节点速度、端点位置等连续帧信息。
