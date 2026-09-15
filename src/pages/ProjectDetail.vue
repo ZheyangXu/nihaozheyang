@@ -42,6 +42,7 @@
       <section class="article">
         <div class="article__inner">
           <article
+            ref="articleEl"
             class="article__content"
             v-html="renderedContent"
           ></article>
@@ -64,9 +65,11 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, watch } from 'vue'
+import { ref, computed, nextTick, onMounted, watch } from 'vue'
 import SiteFooter from '../components/SiteFooter.vue'
 import { renderMarkdown, extractTitle } from '../utils/markdown'
+import { renderMermaidBlocks } from '../utils/mermaid'
+import { renderPseudocodeBlocks } from '../utils/pseudocode'
 
 const props = defineProps<{
   projectId: string
@@ -75,6 +78,7 @@ const props = defineProps<{
 const rawMarkdown = ref('')
 const loading = ref(true)
 const error = ref('')
+const articleEl = ref<HTMLElement | null>(null)
 
 const projectTitle = computed(() => {
   return extractTitle(rawMarkdown.value) || 'Project'
@@ -103,6 +107,21 @@ async function loadContent() {
     loading.value = false
   }
 }
+
+// Diagrams and algorithms live in the v-html output, so they can only be
+// rendered once the DOM has been patched — hence the post-flush watcher rather
+// than a call inside the computed. Each renderer lazily pulls its own library
+// and no-ops when the article has none of its blocks.
+watch(
+  renderedContent,
+  async () => {
+    await nextTick()
+    const root = articleEl.value
+    if (!root) return
+    await Promise.all([renderMermaidBlocks(root), renderPseudocodeBlocks(root)])
+  },
+  { flush: 'post' }
+)
 
 onMounted(loadContent)
 watch(() => props.projectId, loadContent)
@@ -398,6 +417,103 @@ watch(() => props.projectId, loadContent)
   border: none;
   border-top: 1px solid rgba(0, 0, 0, 0.08);
   margin: 48px 0;
+}
+
+/* Mermaid diagrams */
+.article__content :deep(.mermaid) {
+  margin: 24px 0;
+  padding: 24px 16px;
+  background: #fff;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  border-radius: 12px;
+  overflow-x: auto;
+  text-align: center;
+}
+
+/* Hide the raw diagram source while the async mermaid chunk loads, so it
+   never flashes as plain text; rendered and failed blocks are exempt. */
+.article__content :deep(.mermaid:not(.mermaid--rendered):not(.mermaid--error)) {
+  visibility: hidden;
+}
+
+.article__content :deep(.mermaid svg) {
+  max-width: 100%;
+  height: auto;
+}
+
+/* Mermaid measures each label to size its box, then renders the label as HTML
+   inside the SVG. The prose rules above are direct rules on `p`, so they beat
+   the font-size mermaid sets on the SVG root and inflate every label past the
+   box that was measured for it. Reset the ones that leak. `inherit` (rather
+   than a hard-coded size) keeps labels on whatever `themeVariables.fontSize`
+   mermaid actually measured with. */
+.article__content :deep(.mermaid p) {
+  font-size: inherit;
+  line-height: inherit;
+  margin: 0;
+  color: inherit;
+}
+
+/* KaTeX inside a diagram label. Mermaid sizes the label against the literal
+   `$...$` text, and a typeset formula can be taller than the line it replaced,
+   so let it spill rather than clip. */
+.article__content :deep(.mermaid foreignObject) {
+  overflow: visible;
+}
+
+.article__content :deep(.mermaid-math) {
+  white-space: nowrap;
+}
+
+.article__content :deep(.mermaid-math .katex) {
+  font-size: 1em;
+}
+
+.article__content :deep(.mermaid--error) {
+  text-align: left;
+  font-family: 'SF Mono', 'Fira Code', Menlo, monospace;
+  font-size: 13px;
+  line-height: 1.6;
+  color: #b3261e;
+  white-space: pre-wrap;
+  background: #fdf3f2;
+  border-color: rgba(179, 38, 30, 0.25);
+}
+
+/* Algorithms (pseudocode.js).
+   The block is a <pre> only while it still holds LaTeX source; once rendered
+   it is ordinary markup, so drop the code-block treatment. Element+class in
+   the selector to outrank the `:deep(pre)` rule above.
+
+   `white-space: normal` is load-bearing: pseudocode.js emits a literal newline
+   after every closing tag, and inside a <pre> the UA's `white-space: pre` turns
+   each one into a real line break, roughly quadrupling the height of the
+   algorithm. Line breaks the library actually wants are `<br/>` elements. */
+.article__content :deep(pre.pseudocode--rendered) {
+  background: #fff;
+  color: #1a1a2e;
+  font-size: 14px;
+  line-height: 1.6;
+  padding: 20px 24px;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  border-radius: 12px;
+  white-space: normal;
+}
+
+/* Hide the raw LaTeX while the async chunk loads, so it never flashes as
+   source; rendered and failed blocks are exempt. */
+.article__content :deep(pre.pseudocode:not(.pseudocode--rendered):not(.pseudocode--error)) {
+  visibility: hidden;
+}
+
+/* Same leak as the mermaid labels: pseudocode's lines are <p> elements, so the
+   prose rules above would stretch them away from the layout the library
+   computed. Line height must stay at the library's own 1.2. */
+.article__content :deep(.ps-root p) {
+  font-size: inherit;
+  line-height: 1.2;
+  margin: 0;
+  color: inherit;
 }
 
 /* KaTeX math */

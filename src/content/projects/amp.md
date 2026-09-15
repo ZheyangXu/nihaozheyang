@@ -1,63 +1,105 @@
 # AMP
 
-<video width="1080" controls src="..//public/projects/luwu/amp-demo.mp4"></video>
+<video width="1080" controls src="../public/projects/amp/amp-demo.mp4"></video>
 
-AMP（Adversarial Motion Priors，对抗性运动先验）是一种基于 GAN 和强化学习RL的运动控制框架，核心是通过对抗模仿从非结构化运动数据中学习风格特征，让物理模拟角色或真实机器人在完成任务的同时，呈现自然、风格化的运动。
+## 一、基本原理
 
-传统运动控制方法存在两大痛点，一个是手动设计负担重，需精心设计模仿目标（如轨迹跟踪误差）和动作选择机制，难以适配大规模非结构化运动数据。另一个则是运动自然度不足，纯 RL 仅关注任务完成度，生成的运动机械僵硬；传统模仿学习依赖固定轨迹，缺乏灵活性。AMP 本质是对抗学习和强化学习的融合框架，其创新在于无需手动设计模仿规则和动作选择器，用对抗性判别器学习运动数据的风格先验，用 RL 训练控制策略，最终实现任务目标（如导航、击球）和风格模仿（如人类行走、僵尸步态）的双重目标。
-
-## AMP 的原理
-
-AMP 解决的核心问题是在强化学习训练中，智能体的动作容易出现不自然的输出，比如机器人走路姿势僵硬、角色动画卡顿，原因是传统 RL 只优化任务奖励（比如类似于走到终点这种任务），忽略了运动的自然性先验（比如人类走路的关节角度规律），其有以下三大核心组件：
-
-1. 运动数据集 M：主要包含非结构化运动片段，如人类 mocap 数据、关键帧动画等。使用时无需标注技能类别或时序同步信息，仅需提供关节角度、身体姿态的时间序列等运动序列。
-2. 控制策略 π：输入为关节位置、速度角色等状态和目标位置、速度指令等的任务目标，输出为机器人动作，如关节目标角度，核心是通过 RL 学习完成任务并贴合风格的行为，通过 RL 学习最大化任务奖励和风格奖励的累积回报，实现做得对和做得像的统一。
-3. 对抗性判别器 D：核心组件，目标是区分来自 M的真实运动数据和来自π的策略生成的运动。与传统 GAN 不同，D 基于状态转移（
-） 而非单帧状态进行训练，避免依赖运动数据中的动作标签。
-
-AMP 基础思路为，首先构建运动先验模型，用生成对抗网络从真实的自然运动数据中学习运动的概率分布，这个分布就是运动先验，代表合理、自然的动作应该长什么样。然后将先验融入强化学习，在 RL 训练过程中，引入对抗损失，让智能体生成的动作不仅要满足任务奖励，还要尽可能贴近 GAN 学到的自然运动分布，从而平衡任务完成度和动作自然度。
-
-AMP 的数学框架围绕 GAN 损失和 RL 奖励损失的联合优化展开，**核心损失**函数为：
-
+AMP（Adversarial Motion Priors，对抗运动先验）的核心思想是将角色运动的“风格”从非结构化参考运动数据中学习为一种可微的奖励先验，从而把任务目标与运动风格解耦。给定参考运动数据集 $\mathcal{M}$，其中每条运动 $\mathbf{m}^i=\{\hat{\mathbf{q}}_t^i\}$ 是姿态序列，系统并不要求策略逐步跟踪某一特定参考运动，而是训练一个对抗判别器 $D$，使其区分来自数据集的真实状态转移 $(s, s')$ 与由策略产生的虚假状态转移。判别器输出的相似度经变换后作为风格奖励 $r^S$，与任务奖励 $r^G$ 线性组合，形成总体奖励：
 $$
-L_{total} = L_{RL} + \lambda \cdot L_{GAN}
+r(s_t, a_t, s_{t+1}, g)=w^G r^G(s_t, a_t, s_{t+1}, g)+w^S r^S(s_t, s_{t+1}).
 $$
-
-其中 $\lambda > 0$ 是平衡系数，控制自然先验的约束强度。
-
-**判别器**的目标是**区分真实动作和生成动作**，采用标准 GAN 的对数损失，GAN 损失 $L_D$ 公式为：
-
+其中 $w^G$ 与 $w^S$ 分别为任务奖励和风格奖励的权重。任务奖励负责指定“做什么”，例如以目标速度沿目标方向行走、移动到目标位置、运球或击打目标；风格奖励负责指定“如何做”，例如采用行走、奔跑、僵尸步态或潜行步态。由于风格奖励不依赖具体任务目标 $g$，同一个运动先验可服务于多个任务，不同运动先验也可用于同一任务的不同风格。策略在目标条件强化学习框架下最大化期望折扣回报：
 $$
-L_D = -\mathbb{E}_{a_{real}} \sim p_{data}[\log D_{\phi}(a_{real})] - \mathbb{E}_{a_t \sim \pi_{\theta}}[\log(1 - D_{\phi}(a_t))]
+J(\pi)=\mathbb{E}_{\rho(g)}\mathbb{E}_{\rho(\tau|\pi, g)}\left[\sum_{t=0}^{T-1} r_t\right], 
 $$
+其中 $\tau$ 为轨迹，$\pi(a_t|s_t, g)$ 为策略，$g$ 为目标。通过将对抗运动先验嵌入该框架，角色能够在完成高层任务的同时自动组合、插值并泛化参考数据中的多种运动技能，而无需运动规划器或对运动片段进行任务特定标注与选择。
 
-**生成器**的目标是欺骗判别器，让生成的动作被判别为真实，同时还要优化任务奖励。GAN 生成器的对抗损失：
+## 二、方法设计
 
+AMP 采用生成对抗模仿学习（GAIL）的思想，但由于参考运动数据通常只包含状态而不包含演示动作，判别器被设计为状态转移判别器 $D(s, s')$。其原始对抗目标可写为
 $$
-L_G = -\mathbb{E}_{a_t \sim \pi_{\theta}}[\log D_{\phi}(a_t)]
+\arg\min_D -\mathbb{E}_{d^{\mathcal{M}}(s, s')}[\log D(s, s')]-\mathbb{E}_{d^{\pi}(s, s')}[\log(1-D(s, s'))], 
 $$
-
-**PPO 算法**的损失函数即 RL 策略优化损失 $L_{RL}$，其形式为：
-
+其中 $d^{\mathcal{M}}$ 与 $d^{\pi}$ 分别表示数据集和策略的状态转移分布。为缓解 sigmoid 交叉熵在饱和区导致的梯度消失和训练不稳定问题，AMP 采用最小二乘 GAN 目标：
 $$
-L_{PPO} = \mathbb{E}\left[\min\left(r_t(\theta)\hat{A}_t, \; clip\big(r_t(\theta), 1-\epsilon, 1+\epsilon\big)\hat{A}_t\right)\right]
+\arg\min_D \mathbb{E}_{d^{\mathcal{M}}(s, s')}[(D(s, s')-1)^2]+\mathbb{E}_{d^{\pi}(s, s')}[(D(s, s')+1)^2].
 $$
+判别器对数据集样本输出接近 $1$，对策略样本输出接近 $-1$。进一步地，判别器并不直接作用于完整状态，而是先通过观测映射 $\Phi(s)$ 提取与运动风格相关的紧凑特征，即 $D(\Phi(s), \Phi(s'))$。这些特征包括根节点的局部线速度与角速度、各关节的局部旋转、各关节的局部速度以及末端执行器（手、脚等）在角色局部坐标系中的 3D 位置；根节点定义为骨盆，局部坐标系原点位于根节点，$x$ 轴沿根节点朝向，$y$ 轴与全局上方向对齐。球关节的 3D 旋转使用 normal-tangent 的 6D 编码表示，以保证平滑且唯一的旋转表示。由于观测特征不包含任务特定信息，运动先验可在无任务标注的情况下训练，并可跨任务复用。
 
-其中，$r_t(\theta) = \frac{\pi_{\theta_{old}}}(a_t \mid s_t){\pi_{\theta}(a_t \mid s_t)}$ 是策略更新的比率；$\hat{A}_t$ 是优势函数，衡量动作 $a_t$ 的好坏；$\epsilon$ 是 PPO 的剪切系数，防止策略更新幅度过大。
-
-AMP 的关键是将 $\log D_{\phi}(a_t)$ 作为额外的奖励项融入优势函数 $\hat{A}_t$，即：
-
+为了进一步提升训练稳定性，AMP 在判别器目标中加入梯度惩罚，惩罚真实数据流形上的非零梯度，避免生成器因判别器近似误差而偏离数据流形。加入梯度惩罚后的判别器目标为
 $$
-\hat{A}_t = A_{task}, t + \lambda \cdot \log D_{\phi}(a_t)
+\begin{aligned}
+\arg\min_D\; &\mathbb{E}_{d^{\mathcal{M}}(s, s')}\left[(D(\Phi(s), \Phi(s'))-1)^2\right]\\
+&+\mathbb{E}_{d^{\pi}(s, s')}\left[(D(\Phi(s), \Phi(s'))+1)^2\right]\\
+&+\frac{w^{SD}}{2}\mathbb{E}_{d^{\mathcal{M}}(s, s')}\left[\left\|\nabla_{\phi}D(\phi)\big|_{\phi=(\Phi(s), \Phi(s'))}\right\|^2\right], 
+\end{aligned}
 $$
+其中 $w^{SD}$ 为梯度惩罚系数。判别器给出的风格奖励由下式变换得到：
+$$
+r^S(s_t, s_{t+1})=\max\left[0, 1-0.25\left(D(\Phi(s_t), \Phi(s_{t+1}))-1\right)^2\right].
+$$
+该式将判别器输出映射到 $[0, 1]$ 区间，作为策略训练时的风格奖励。策略与值函数采用 PPO 与 GAIL 联合训练：值函数使用 TD($\lambda$) 更新，策略使用 GAE($\lambda$) 计算优势并更新；判别器则从参考运动数据集与策略轨迹回放缓冲区中采样状态转移进行更新。回放缓冲区有助于防止判别器过拟合到策略最近产生的轨迹。
 
-这样，智能体在优化任务的同时，会主动学习更自然的动作。
+在模型表示方面，状态 $s_t$ 包括各连杆相对根节点的位置、以 6D normal-tangent 编码表示的连杆旋转，以及线速度和角速度，所有特征均在角色局部坐标系中记录。与依赖相位变量或目标姿态同步的跟踪式方法不同，AMP 的策略不需要与某一参考运动同步，因此状态中不包含相位变量或目标姿态。动作 $a_t$ 指定各关节 PD 控制器的目标位置；对于球关节，目标以 3D 指数映射 $\mathfrak{q}\in\mathbb{R}^3$ 表示，其旋转轴与旋转角分别为
+$$
+\mathbf{v}=\frac{\mathbf{q}}{\|\mathbf{q}\|_2}, \qquad \theta=\|\mathbf{q}\|_2.
+$$
+该参数化比四元数或轴角表示更紧凑，并可避免欧拉角的万向锁问题。策略网络输出高斯分布 $\pi(a_t|s_t, g)=\mathcal{N}(\mu(s_t, g), \Sigma)$，均值由全连接网络给出，协方差矩阵固定。值函数与判别器采用类似网络结构。
 
-### AMP 的基本设计逻辑
+## 三、训练流程
 
-AMP 的设计逻辑围绕非结构化运动数据驱动，对抗模仿学习，强化学习的融合展开，核心是通过数据预处理、网络架构搭建、联合训练、推理部署四步闭环，实现任务执行与风格模仿的统一。
+训练开始时，初始化判别器 $D$、策略 $\pi$、值函数 $V$ 以及回放缓冲区 $\mathcal{B}$。在每一轮迭代中，首先使用当前策略与环境交互，收集若干条轨迹。对轨迹中的每个时间步 $t$，将状态转移 $(\Phi(s_t), \Phi(s_{t+1}))$ 输入判别器，得到判别分数 $d_t=D(\Phi(s_t), \Phi(s_{t+1}))$，再根据上式风格奖励公式计算 $r_t^S$。同时从环境中获得任务奖励 $r_t^G$。随后按总体奖励公式组合 $r_t=w^G r_t^G+w^S r_t^S$，并记录到轨迹中。收集完成后，将轨迹存入回放缓冲区 $\mathcal{B}$。
 
-![alt text](../public/projects/luwu/amp-psude-code.png)
+判别器的更新从参考运动数据集 $\mathcal{M}$ 中采样一批真实状态转移，并从回放缓冲区 $\mathcal{B}$ 中采样一批策略状态转移，按照带梯度惩罚的最小二乘目标更新判别器。该过程可重复若干步。随后，使用本轮收集的轨迹数据更新值函数 $V$ 与策略 $\pi$。值函数以 TD($\lambda$) 目标更新，策略以 GAE($\lambda$) 优势通过 PPO 更新。上述过程循环进行，直至训练结束。由于风格奖励直接作用于策略产生的运动，AMP 能够自动从数据集中选择、插值和组合合适的行为，而无需显式的运动选择机制或高层运动规划器。
+
+## 四、伪代码
+
+<pre class="pseudocode">
+\documentclass{article}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{bm}
+
+\begin{document}
+
+\begin{algorithm}
+\caption{Training with AMP}
+\begin{algorithmic}[1]
+\Require $\mathcal{M}$: dataset of reference motions
+\State $D \leftarrow$ initialize discriminator
+\State $\pi \leftarrow$ initialize policy
+\State $V \leftarrow$ initialize value function
+\State $\mathcal{B} \leftarrow \emptyset$ initialize replay buffer
+
+\While{not done}
+
+    \For{trajectory $i = 1, \dots, m$}
+        \State $\tau^i \leftarrow \{(s_t, a_t, r_t^G)_{t=0}^{T-1}, s_T^G, g\}$ collect trajectory with $\pi$
+        \For{time step $t = 0, \dots, T - 1$}
+            \State $d_t \leftarrow D(\Phi(s_t), \Phi(s_{t+1}))$
+            \State $r_t^S \leftarrow$ calculate style reward according to Equation 7 using $d_t$
+            \State $r_t \leftarrow w^G r_t^G + w^S r_t^S$
+            \State record $r_t$ in $\tau^i$
+        \EndFor
+        \State store $\tau^i$ in $\mathcal{B}$
+    \EndFor
+
+    \For{update step $= 1, \dots, n$}
+        \State $b^{\mathcal{M}} \leftarrow$ sample batch of $K$ transitions $\{(s_j, s_j')\}_{j=1}^K$ from $\mathcal{M}$
+        \State $b^{\pi} \leftarrow$ sample batch of $K$ transitions $\{(s_j, s_j')\}_{j=1}^K$ from $\mathcal{B}$
+        \State update $D$ according to Equation 8 using $b^{\mathcal{M}}$ and $b^{\pi}$
+    \EndFor
+
+    \State update $V$ and $\pi$ using data from trajectories $\{\tau^i\}_{i=1}^m$
+
+\EndWhile
+\end{algorithmic}
+\end{algorithm}
+
+\end{document}
+</pre>
 
 Equation 7:
 
@@ -75,43 +117,45 @@ $$
 \end{align}
 $$
 
-#### 数据预处理
-
-* **数据采集**：收集多样化原始运动数据，来源包括人类动作捕捉(mocap)数据、艺术家关键帧动画、机器人轨迹优化结果等。数据形式为状态序列，包含关节角度、根节点速度、端点位置等连续帧信息。
-* **数据适配与增强**：
-  + 运动重定向：将人类或通用动捕数据通过优化映射到目标主体，保证运动相似度的同时满足 kinematic 约束。
-  + 标准化处理：对数据进行归一化，去除异常帧，并通过镜像、时间缩放、反向播放等方式增强数据多样性。
-  + 特征提取：提前提取运动的核心特征，如根节点的线性/角速度、关节局部旋转与速度、端点 3D 位置，所有特征基于主体局部坐标系。
-* **数据初始化适配**：训练时采用参考状态初始化策略，将角色/机器人的初始状态随机采样自运动数据集，同时设置早期终止条件。
-
-#### 网络架构设计
-
-AMP 无传统 GAN 的生成器，而是以 **RL 策略网络**为**核心执行单元**，以**对抗判别器**为**风格评估单元**。
-
-* **RL 策略网络（$\pi$）**：输入为实时状态（关节位置/速度、根节点姿态、地面接触状态等）和任务目标（目标位置、速度指令等），输出为动作指令（关节目标角度、力矩参数）。网络结构采用 MLP，通常包含 2-3 个隐藏层（如 1024→512 神经元），激活函数为 ReLU，策略输出服从高斯分布。
-* **对抗判别器（D）**：输入为状态转移 $(s_t, s_{t+1})$ 而非动作序列或单帧状态，解决运动数据中动作标签不可得的问题，同时捕捉运动的动态特征。输出为连续值分数（接近 1 表示真实运动，-1 表示生成运动）。网络结构与策略网络架构一致，采用最小二乘损失优化，避免梯度饱和。
-
-#### 联合训练流程
-
-* **初始化配置**：初始化策略网络 $\pi$、价值函数 $V$、判别器 $D$、回放缓冲区 $B$，设定超参数（$w^G = 0.5$，$w^S = 0.5$，梯度惩罚系数 $w^{GP} = 10$，PPO 裁剪阈值 $0.02$，折扣因子 $\gamma$ 对单风格模仿设为 $0.95$，对复杂任务设为 $0.99$）。
-* **轨迹收集与奖励计算**：用当前策略 $\pi$ 生成轨迹，记录状态 $s_t$、动作 $a_t$、任务奖励 $r^G$。将状态转移输入判别器 $D$ 得到相似度分数，通过公式 $r^S = \max\left[0, \; 1 - 0.25\big(D(s_t, s_{t+1}) - 1\big)^2\right]$ 转换为 $[0, 1]$ 区间的风格奖励。总奖励 $r = w^G \cdot r^G + w^S \cdot r^S$。
-* **交替更新**：
-  + 先更新判别器 $D$：从运动数据集 $M$ 采样真实状态转移 $b_M$，从回放缓冲区 $B$ 采样生成状态转移 $b_\pi$。损失采用最小二乘损失 + 梯度惩罚。
-  + 更新策略 $\pi$ 与价值函数 $V$：从回放缓冲区采样轨迹，用 GAE($\lambda$) 计算优势函数，TD($\lambda$) 更新价值函数 $V$，用 PPO 算法更新策略 $\pi$。
-* **动态调优**：可动态调整 $w^G$ 与 $w^S$，如初期增大 $w^S$ 让策略先学习风格，后期增大 $w^G$ 优先保证任务完成度。
-* **多风格适配（Multi-AMP）**：通过 one-hot 风格选择器切换不同判别器 $D^i$，每个风格对应独立的缓冲区 $B^i$，实现多风格并行训练与实时切换。
-
-#### 推理阶段
-
-训练完成后，策略 $\pi$ 根据实时状态与任务目标自动生成符合风格的动作，无需手动选择运动片段或调整参数。判别器冻结，风格通过训练习得的策略内隐式保留。
-
-### 稳定对抗训练的核心设计
-
-* **最小二乘判别器**：采用最小二乘损失替代交叉熵损失，避免 sigmoid 函数在输出极端值时的梯度饱和问题，让策略 $\pi$ 在训练全程都能获得有效梯度反馈。
-* **梯度惩罚**：在判别器的损失函数中加入额外惩罚项，对真实运动样本的观察特征 $\phi(s, s')$ 计算梯度的 L2 范数，惩罚非零梯度，防止策略偏离真实运动分布。
-* **细粒度观察特征**：包含根节点动态（线性速度和角速度）、关节细节（局部旋转和局部速度）、端点特征（手、脚等的 3D 位置），完整覆盖整体-局部-端点的运动动态信息，让判别器能精准区分真实运动的自然动态与生成运动的机械动态。
-
 ## 实验设置
+
+### 训练数据集
+
+实验从 AMASS 数据集中选取了多段行走, 跑步和转弯的数据集, 包含慢速走, 快跑, 左转弯, 右转弯, 行走切换到跑步等.
+
+1. 倒着走
+
+<video width="1080" controls src="../public/projects/amp/unitree_g1_B4_-_Stand_to_Walk_backwards_stageii.mp4"></video>
+
+2. 右转弯跑
+
+<video width="1080" controls src="../public/projects/amp/unitree_g1_C14_-__run_turn_right__(90)_stageii.mp4"></video>
+
+3. 不同方向跑
+
+<video width="1080" controls src="../public/projects/amp/unitree_g1_C17_-_run_change_direction_stageii.mp4"></video>
+
+4. 跳步
+
+<video width="1080" controls src="../public/projects/amp/unitree_g1_Run_C25_-_quick_side_step_right_stageii.mp4"></video>
+
+5. 网球发球
+
+<video width="1080" controls src="../public/projects/amp/unitree_g1_hmr4d_results.mp4"></video>
+
+### 训练结果
+
+<video width="1080" controls src="../public/projects/amp/amp-demo.mp4"></video>
+
+#### 关键曲线
+
+![alt text](../public/projects/luwu/g1_amp_total_reward.png)
+
+![alt text](../public/projects/luwu/g1_amp_mean_reward.png)
+
+![alt text](../public/projects/luwu/g1_amp_mean_episode_length.png)
+
+![alt text](../public/projects/luwu/g1_amp_disc_loss.png)
 
 ### MDP
 
@@ -196,20 +240,6 @@ Observations 分成三部分: actor, critic 和 discriminator 的输入，分别
 | task style lerp    | 0.3         | 任务奖励和风格奖励的平衡 |
 | loss type          | LSGAN       | 最小二乘 GAN             |
 
-### 训练结果
-
-<video width="1080" controls src="..//public/projects/luwu/amp-demo.mp4"></video>
-
-#### 关键曲线
-
-![alt text](../public/projects/luwu/g1_amp_total_reward.png)
-
-![alt text](../public/projects/luwu/g1_amp_mean_reward.png)
-
-![alt text](../public/projects/luwu/g1_amp_mean_episode_length.png)
-
-![alt text](../public/projects/luwu/g1_amp_disc_loss.png)
-
 ## 附录
 
 ### Unitree G1 Joints
@@ -245,90 +275,3 @@ Observations 分成三部分: actor, critic 和 discriminator 的输入，分别
 | 26    | right_wrist_pitch_joint     |
 | 27    | left_wrist_yaw_joint        |
 | 28    | right_wrist_yaw_joint       |
-
-### Agent Config
-
-```yaml
-seed: 42
-device: cuda:0
-num_steps_per_env: 24
-max_iterations: 50000
-empirical_normalization: {}
-obs_groups:
-  policy:
-  - policy
-  critic:
-  - critic
-  discriminator:
-  - disc
-  discriminator_demonstration:
-  - disc_demo
-clip_actions: null
-check_for_nan: true
-save_interval: 200
-experiment_name: g1_amp
-run_name: ''
-logger: tensorboard
-neptune_project: isaaclab
-wandb_project: isaaclab
-resume: false
-load_run: .*
-load_checkpoint: model_.*.pt
-class_name: AMPRunner
-actor: {}
-critic: {}
-algorithm:
-  class_name: PPOAMP
-  num_learning_epochs: 5
-  num_mini_batches: 4
-  learning_rate: 0.0001
-  schedule: adaptive
-  gamma: 0.99
-  lam: 0.95
-  entropy_coef: 0.01
-  desired_kl: 0.01
-  max_grad_norm: 1.0
-  optimizer: adam
-  value_loss_coef: 1.0
-  use_clipped_value_loss: true
-  clip_param: 0.2
-  normalize_advantage_per_mini_batch: false
-  share_cnn_encoders: false
-  rnd_cfg: null
-  symmetry_cfg:
-    use_data_augmentation: true
-    use_mirror_loss: true
-    data_augmentation_func: luwu.tasks.tracking.amp.mdp.symmetry.g1:compute_symmetric_states
-    mirror_loss_coeff: 0.1
-  amp_cfg:
-    disc_obs_buffer_size: 100
-    grad_penalty_scale: 10.0
-    disc_trunk_weight_decay: 0.0001
-    disc_linear_weight_decay: 0.01
-    disc_learning_rate: 0.0001
-    disc_max_grad_norm: 1.0
-    amp_discriminator:
-      hidden_dims:
-      - 1024
-      - 512
-      activation: elu
-      style_reward_scale: 5.0
-      task_style_lerp: 0.3
-    loss_type: LSGAN
-policy:
-  class_name: ActorCritic
-  init_noise_std: 1.0
-  noise_std_type: scalar
-  state_dependent_std: false
-  actor_obs_normalization: false
-  critic_obs_normalization: false
-  actor_hidden_dims:
-  - 512
-  - 256
-  - 128
-  critic_hidden_dims:
-  - 512
-  - 256
-  - 128
-  activation: elu
-```
