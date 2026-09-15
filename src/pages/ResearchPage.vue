@@ -61,11 +61,18 @@ const projects: Project[] = [
     link: '/projects/amp',
   },
   {
-    title: 'DeepMimic',
+    title: ' GMR',
     description:
-      'DeepMimic: 一个基于引导扩散的现实世界框架, 旨在从人类动作中学习并实现多样化, 自然的人形机器人全身控制.',
+      'GMR',
+    imageColor: 'linear-gradient(135deg, #4a90d9 0%, #67b8f7 50%, #a0d2ff 100%)',
+    link: '/projects/gmr',
+  },
+  {
+    title: 'BeyondMimic',
+    description:
+      'BeyondMimic: 一个基于引导扩散的现实世界框架, 旨在从人类动作中学习并实现多样化, 自然的人形机器人全身控制.',
     imageColor: 'linear-gradient(135deg, #2ecc71 0%, #58d68d 50%, #82e0aa 100%)',
-    link: '/projects/mimic',
+    link: '/projects/beyondmimic',
   },
   {
     title: ' PID-DE-MPC',
@@ -80,6 +87,13 @@ const projects: Project[] = [
       '使用 IsaacLab 来实现 Cyberdog2 的四足机器人 Locomotion 控制, 通过强化学习来提升四足机器人的运动能力.',
     imageColor: 'linear-gradient(135deg, #7b4fbf 0%, #9b7fd4 50%, #c4b0e8 100%)',
     link: '/projects/luwu',
+  },
+  {
+    title: 'SMP',
+    description:
+      'Score-Matching Motion Priors（SMP）是一种可重用、模块化的运动先验构造方法，其核心思想是利用预训练的运动扩散模型，通过分数蒸馏采样（Score Distillation Sampling, SDS）将其转化为强化学习中的风格奖励函数。',
+    imageColor: 'linear-gradient(135deg, #4a90d9 0%, #67b8f7 50%, #a0d2ff 100%)',
+    link: '/projects/smp',
   },
   
 ]

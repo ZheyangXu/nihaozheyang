@@ -1,0 +1,13 @@
+diff --git a/src/Renderer.js b/src/Renderer.js
+index f1640a2fbe18e34b7d639e0bf7322a14e3acfc0f..b9b950a7812f5a6d6e1474428ceafe771e418dd4 100644
+--- a/src/Renderer.js
++++ b/src/Renderer.js
+@@ -376,7 +376,7 @@ HTMLBuilder.prototype._beginTag = function (tag, className, style, extraStyle) {
+         else { // style
+             styleCode = '';
+             for (var attrName in style) {
+-                attrVal = style[attrName];
++                var attrVal = style[attrName];
+                 styleCode += `${attrName}:${attrVal};`;
+             }
+         }
