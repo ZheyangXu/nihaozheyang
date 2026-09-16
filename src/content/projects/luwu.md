@@ -1,13 +1,20 @@
 # 陆吾
 
-## IsaacLab 四足速度任务说明（Observations / Actions / Rewards）
+## 训练结果
 
-本文整理以下配置与实现：
+### Flat 和 Rough 地形
 
-* 环境配置：`source/luwu/luwu/tasks/locomotion/robots/velocity_env_cfg.py`
-* 本地 MDP 扩展：`source/luwu/luwu/tasks/locomotion/mdp/rewards.py`
-* IsaacLab 通用项：`isaaclab/envs/mdp/{observations,rewards,actions}`
-* IsaacLab 速度任务项：`isaaclab_tasks/manager_based/locomotion/velocity/mdp/rewards.py`
+<video width="1080" controls src="../public/projects/luwu/cyberdog2-flat-mjlab.mp4"></video>
+
+<video width="1080" controls src="../public/projects/luwu/cyberdog2-rough-mjlab.mp4"></video>
+
+## 真机部署
+
+Gazebo
+
+<video width="1080" controls src="../public/projects/luwu/cyberdog2-gazebo.mp4"></video>
+
+## 四足速度任务说明（Observations / Actions / Rewards）
 
 ## 1. 符号约定
 

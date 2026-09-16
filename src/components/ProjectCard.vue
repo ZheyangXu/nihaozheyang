@@ -17,9 +17,25 @@
     >
     </a>
     <div class="project-card__inner">
-      <!-- Media / Image -->
+      <!-- Media: custom image / video, falls back to a solid-color placeholder -->
       <div class="project-card__media">
-        <div class="project-card__image" :style="{ background: imageColor }">
+        <img
+          v-if="media && media.type === 'image'"
+          class="project-card__media-el"
+          :src="media.src"
+          :alt="title"
+        />
+        <video
+          v-else-if="media && media.type === 'video'"
+          class="project-card__media-el"
+          :src="media.src"
+          :poster="media.poster"
+          autoplay
+          muted
+          loop
+          playsinline
+        ></video>
+        <div v-else class="project-card__image" :style="{ background: imageColor }">
           <span class="project-card__image-text">{{ title }}</span>
         </div>
       </div>
@@ -49,6 +65,18 @@
   </article>
 </template>
 
+<script lang="ts">
+/** Cover media of a project card: a custom image or video. */
+export interface ProjectMedia {
+  /** Media kind */
+  type: 'image' | 'video'
+  /** Image/video source, e.g. '/projects/ame/demo.mp4' */
+  src: string
+  /** Optional poster image, shown before a video starts playing */
+  poster?: string
+}
+</script>
+
 <script setup lang="ts">
 import { computed } from 'vue'
 
@@ -57,8 +85,10 @@ interface ProjectCardProps {
   title: string
   /** Card description */
   description?: string
-  /** CSS background value for the placeholder image */
+  /** CSS background value for the placeholder image, used when `media` is absent */
   imageColor?: string
+  /** Custom image or video cover, takes precedence over `imageColor` */
+  media?: ProjectMedia
   /** Link URL for the card */
   link?: string
 }
@@ -129,6 +159,14 @@ const isInternalLink = computed(() => {
   display: flex;
   align-items: center;
   justify-content: center;
+}
+
+/* Custom image / video cover */
+.project-card__media-el {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 .project-card__image-text {

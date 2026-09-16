@@ -50,6 +50,12 @@ const router = createRouter({
       component: () => import("../pages/ProjectDetail.vue"),
       props: { projectId: "smp" },
     },
+    {
+      path: "/projects/humanoid",
+      name: "humanoid",
+      component: () => import("../pages/ProjectDetail.vue"),
+      props: { projectId: "humanoid" },
+    },
   ],
 });
 
