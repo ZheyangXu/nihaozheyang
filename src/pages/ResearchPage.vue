@@ -26,6 +26,7 @@
             :key="project.title"
             :title="project.title"
             :description="project.description"
+            :media="project.media"
             :image-color="project.imageColor"
             :link="project.link"
           />
@@ -36,12 +37,19 @@
 </template>
 
 <script setup lang="ts">
-import ProjectCard from '../components/ProjectCard.vue'
+import ProjectCard, { type ProjectMedia } from '../components/ProjectCard.vue'
 
 interface Project {
   title: string
   description: string
+  /** 纯色占位封面, 未配置 media 时使用 */
   imageColor: string
+  /**
+   * 自定义封面, 可以指定图片或者视频, 配置后 imageColor 不再生效:
+   *   media: { type: 'image', src: '/projects/ame/cover.png' }
+   *   media: { type: 'video', src: '/projects/ame/demo.mp4', poster: '/projects/ame/cover.png' }
+   */
+  media?: ProjectMedia
   link: string
 }
 
@@ -52,6 +60,7 @@ const projects: Project[] = [
       'AME 算法通过基于注意力的地图编码架构来处理高程地图以提取地形感知特征, 用于控制决策, 来提升机器人在复杂地形上的运动能力.',
     imageColor: 'linear-gradient(135deg, #e8734a 0%, #f59e6b 50%, #f7c9a8 100%)',
     link: '/projects/ame',
+    media: {type: 'video', src: '/projects/ame/g1-stacks-ame2.mp4'}
   },
   {
     title: 'AMP',
@@ -59,6 +68,7 @@ const projects: Project[] = [
       'AMP(Adversarial Motion Priors, 对抗性运动先验) 是一种基于 GAN 和强化学习RL的运动控制框架, 核心是通过对抗模仿从非结构化运动数据中学习风格特征, 让物理模拟角色或真实机器人在完成任务的同时, 呈现自然, 风格化的运动.',
     imageColor: 'linear-gradient(135deg, #4a90d9 0%, #67b8f7 50%, #a0d2ff 100%)',
     link: '/projects/amp',
+    media: {type: 'video', src: '/projects/amp/amp-demo.mp4'}
   },
   {
     title: ' GMR',
@@ -66,6 +76,7 @@ const projects: Project[] = [
       'GMR',
     imageColor: 'linear-gradient(135deg, #4a90d9 0%, #67b8f7 50%, #a0d2ff 100%)',
     link: '/projects/gmr',
+    media: {type: 'video', src: '/projects/amp/unitree_g1_C17_-_run_change_direction_stageii.mp4'}
   },
   {
     title: 'BeyondMimic',
@@ -73,6 +84,7 @@ const projects: Project[] = [
       'BeyondMimic: 一个基于引导扩散的现实世界框架, 旨在从人类动作中学习并实现多样化, 自然的人形机器人全身控制.',
     imageColor: 'linear-gradient(135deg, #2ecc71 0%, #58d68d 50%, #82e0aa 100%)',
     link: '/projects/beyondmimic',
+    media: {type: 'video', src: '/projects/P2_play.mp4'}
   },
   {
     title: ' PID-DE-MPC',
@@ -80,6 +92,7 @@ const projects: Project[] = [
       '通过 PID 事件驱动触发的减少 MPC 中的 QP 求解次数, 来提升 MPC 的运行速度. 同时通过抗扰动模块来提升机器人的抗扰动能力.',
     imageColor: 'linear-gradient(135deg, #e74c3c 0%, #f0736a 50%, #f5a097 100%)',
     link: '/projects/mpc',
+    media: {type: 'video', src: '/projects/mpc/ex11_pid_de_mpc.mp4'}
   },
   {
     title: '陆吾',
@@ -87,6 +100,7 @@ const projects: Project[] = [
       '使用 IsaacLab 来实现 Cyberdog2 的四足机器人 Locomotion 控制, 通过强化学习来提升四足机器人的运动能力.',
     imageColor: 'linear-gradient(135deg, #7b4fbf 0%, #9b7fd4 50%, #c4b0e8 100%)',
     link: '/projects/luwu',
+    media: {type: 'video', src: '/projects/luwu/cyberdog2-gazebo.mp4'}
   },
   {
     title: 'SMP',
@@ -94,6 +108,14 @@ const projects: Project[] = [
       'Score-Matching Motion Priors（SMP）是一种可重用、模块化的运动先验构造方法，其核心思想是利用预训练的运动扩散模型，通过分数蒸馏采样（Score Distillation Sampling, SDS）将其转化为强化学习中的风格奖励函数。',
     imageColor: 'linear-gradient(135deg, #4a90d9 0%, #67b8f7 50%, #a0d2ff 100%)',
     link: '/projects/smp',
+  },
+  {
+    title: 'Humanoid',
+    description:
+      '人形机器人项目合集展示.',
+    imageColor: 'linear-gradient(135deg, #7b4fbf 0%, #9b7fd4 50%, #c4b0e8 100%)',
+    link: '/projects/humanoid',
+    media: {type: 'video', src: '/projects/humanoid/g1_host_stand_up.mp4'}
   },
   
 ]
@@ -169,13 +191,13 @@ const projects: Project[] = [
 /* ── Cards Grid ── */
 .projects__grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(2, 1fr);
   gap: 24px;
 }
 
 @media (max-width: 1024px) {
   .projects__grid {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: 1fr;
   }
 
   .cover {
