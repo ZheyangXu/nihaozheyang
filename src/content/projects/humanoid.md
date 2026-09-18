@@ -23,3 +23,13 @@
 1. KL Match
 
 <video width="1080" controls src="../public/projects/humanoid/kl-match.mp4"></video>
+
+## Fast-Lio 建图与定位
+
+<video width="1080" controls src="../public/projects/humanoid/indoor1.mp4"></video>
+
+![alt text](../../../public/projects/humanoid/indoor1.png)
+
+## A star 和 DWA 的路径规划与避障
+
+<video width="1080" controls src="../public/projects/humanoid/astar.mp4"></video>
