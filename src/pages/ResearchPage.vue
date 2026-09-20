@@ -100,7 +100,7 @@ const projects: Project[] = [
       '使用 IsaacLab 来实现 Cyberdog2 的四足机器人 Locomotion 控制, 通过强化学习来提升四足机器人的运动能力.',
     imageColor: 'linear-gradient(135deg, #7b4fbf 0%, #9b7fd4 50%, #c4b0e8 100%)',
     link: '/projects/luwu',
-    media: {type: 'video', src: '/projects/luwu/cyberdog2-gazebo.mp4'}
+    media: {type: 'video', src: '/projects/luwu/cyberdog2-flat.mp4'}
   },
   {
     title: 'SMP',

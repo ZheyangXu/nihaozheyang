@@ -1,5 +1,7 @@
 # 陆吾
 
+<video controls src="../public/projects/luwu/cyberdog2-flat.mp4" title="Title"></video>
+
 ## 训练结果
 
 ### Flat 和 Rough 地形
@@ -13,6 +15,11 @@
 Gazebo
 
 <video width="1080" controls src="../public/projects/luwu/cyberdog2-gazebo.mp4"></video>
+
+真机
+
+<video controls src="../public/projects/luwu/cyberdog2-flat.mp4" title="Title"></video>
+
 
 ## 四足速度任务说明（Observations / Actions / Rewards）
 
