@@ -1,4 +1,218 @@
-# GMR
+# GVHMR+GMR 重定向
+
+## 演示视频
+
+### 秧歌
+
+流程: 下载视频 -> GVHMR 估计人体运动 -> GMR 重定向到 Unitree G1 -> 生成视频
+
+<div class="video-grid">
+<figure>
+<video width="100%" controls src="../public/projects/retarget/gvhmr-duochanbu.mp4"></video>
+<figcaption>跺颤步</figcaption>
+</figure>
+<figure>
+<video width="100%" controls src="../public/projects/retarget/gmr-duochanbu.mp4"></video>
+<figcaption>跺颤步</figcaption>
+</figure>
+<figure>
+<video width="100%" controls src="../public/projects/retarget/gvhmr-gouxiongduosuomao.mp4"></video>
+<figcaption>狗熊哆嗦毛</figcaption>
+</figure>
+
+<figure>
+<video width="100%" controls src="../public/projects/retarget/gmr-gouxiongduosuomao.mp4"></video>
+<figcaption>狗熊哆嗦毛</figcaption>
+</figure>
+
+<!-- <figure>
+<video width="100%" controls src="../public/projects/retarget/gvhmr-langzitiqiu.mp4"></video>
+<figcaption>浪子踢球</figcaption>
+</figure>
+
+<figure>
+<video width="100%" controls src="../public/projects/retarget/gvhmr-langzitiqiu.mp4"></video>
+<figcaption>浪子踢球</figcaption>
+</figure> -->
+
+<figure>
+<video width="100%" controls src="../public/projects/retarget/gvhmr-shanshenbu.mp4"></video>
+<figcaption>闪身步</figcaption>
+</figure>
+
+<figure>
+<video width="100%" controls src="../public/projects/retarget/gmr-shanshenbu.mp4"></video>
+<figcaption>闪身步</figcaption>
+</figure>
+
+<figure>
+<video width="100%" controls src="../public/projects/retarget/gvhmr-tibeigu.mp4"></video>
+<figcaption>提背鼓</figcaption>
+</figure>
+
+<figure>
+<video width="100%" controls src="../public/projects/retarget/gmr-tibeigu.mp4"></video>
+<figcaption>提背鼓</figcaption>
+</figure>
+
+<figure>
+<video width="100%" controls src="../public/projects/retarget/gvhmr-yaotouhuangnao.mp4"></video>
+<figcaption>摇头晃脑</figcaption>
+</figure>
+
+<figure>
+<video width="100%" controls src="../public/projects/retarget/gmr-yaotouhuangnao.mp4"></video>
+<figcaption>摇头晃脑</figcaption>
+</figure>
+</div>
+
+### 行走与奔跑
+
+<div class="video-grid">
+<figure>
+<video width="100%" controls src="../public/projects/amp/unitree_g1_B4_-_Stand_to_Walk_backwards_stageii.mp4"></video>
+<figcaption>倒着走</figcaption>
+</figure>
+
+<figure>
+<video width="100%" controls src="../public/projects/amp/unitree_g1_C14_-__run_turn_right__(90)_stageii.mp4"></video>
+<figcaption>右转弯跑</figcaption>
+</figure>
+
+<figure>
+<video width="100%" controls src="../public/projects/amp/unitree_g1_C17_-_run_change_direction_stageii.mp4"></video>
+<figcaption>不同方向跑</figcaption>
+</figure>
+
+<figure>
+<video width="100%" controls src="../public/projects/amp/unitree_g1_Run_C25_-_quick_side_step_right_stageii.mp4"></video>
+<figcaption>跳步</figcaption>
+</figure>
+
+<figure>
+<video width="100%" controls src="../public/projects/amp/unitree_g1_hmr4d_results.mp4"></video>
+<figcaption>网球发球</figcaption>
+</figure>
+</div>
+
+## GVHMR 的原理、方法与流程
+
+### 一、基本原理
+
+世界坐标系下的人体运动恢复（World-Grounded Human Motion Recovery）旨在从单目视频中重建连续的三维人体运动，并要求运动位于一个重力感知的世界坐标系中。该任务的核心困难在于世界坐标系的定义本身具有歧义：给定重力方向后，绕重力轴的任意旋转都构成一个合法的重力感知世界坐标系，因此不同序列之间的全局朝向无法统一。已有方法通常以自回归方式预测相邻帧间的相对运动，但这种方式容易在长序列中累积误差，尤其在重力方向上难以保持一致性。
+
+GVHMR 的基本思想是：对于每一帧图像，人类可以直观地推断出图像中人物的重力感知姿态；并且对于相邻两帧，估计绕重力方向的单自由度旋转远比估计完整的三自由度旋转更加容易和鲁棒。基于这一观察，GVHMR 提出了一种新的 Gravity-View（GV）坐标系，该坐标系由世界重力方向与相机视线方向共同定义。由于 GV 坐标系天然与重力对齐，且对于每一帧图像都是唯一确定的，因此它大幅降低了图像到姿态映射的学习歧义。网络在 GV 坐标系下逐帧预测人体朝向，而不同帧的 GV 坐标系之间的相对旋转仅发生在绕重力轴的方向上，从而可以系统地避免重力方向上的累积误差。最后，利用相机相对旋转将所有帧的预测结果变换到一个统一的重力感知世界坐标系中，形成全局运动序列。由于每帧独立预测，GVHMR 避免了自回归方法的误差累积，并且可以并行处理长序列。
+
+### 二、方法设计
+
+#### 2.1 Gravity-View 坐标系
+
+给定相机空间中的重力方向 $\vec{g}$ 与相机视线方向 $\overrightarrow{view}=[0, 0, 1]^T$，GV 坐标系的三个坐标轴定义如下：首先令 $y$ 轴与重力方向对齐，即 $\vec{y}=\vec{g}$；然后令 $x$ 轴同时垂直于重力方向与相机视线方向，即 $\vec{x}=\vec{y}\times\overrightarrow{view}$；最后根据右手定则得到 $z$ 轴，即 $\vec{z}=\vec{x}\times\vec{y}$。由此，人体在 GV 坐标系下的朝向可表示为
+$$
+\Gamma_{GV} = R_{c2GV}\cdot\Gamma_{c} = [\vec{x}, \vec{y}, \vec{z}]^{T}\cdot\Gamma_{c}, 
+$$
+其中 $\Gamma_{c}$ 为相机坐标系下的人体朝向。由于 GV 坐标系由输入图像直接确定，因此 $\Gamma_{GV}$ 是定义良好且与重力对齐的学习目标。
+
+#### 2.2 全局轨迹恢复
+
+对于静态相机，所有帧的 GV 坐标系完全相同，因此人体全局朝向 $\{\Gamma_{w}^{t}\}$ 直接等于 $\{\Gamma_{GV}^{t}\}$。全局平移 $\{\tau_{w}^{t}\}$ 由预测的局部根速度 $v_{root}$ 经朝向变换后累加得到：
+$$
+\tau_{w}^{t} = \begin{cases}
+[0, 0, 0]^{T}, & t = 0, \\
+\sum_{i=0}^{t-1}\Gamma_{w}^{i}v_{root}^{i}, & t > 0.
+\end{cases}
+$$
+
+对于动态相机，需要计算相邻帧 GV 坐标系之间的相对旋转 $R_{\Delta GV}^{t}$。首先计算第 $t$ 帧从相机到 GV 坐标系的旋转 $R_{c2gv}^{t} = \Gamma_{GV}^{t}\cdot(\Gamma_{c}^{t})^{-1}$，然后将相机视线方向变换到 GV 坐标系：
+$$
+\overrightarrow{view}_{GV}^{t} = R_{c2gv}^{t}\cdot[0, 0, 1]^{T}.
+$$
+利用相机相对旋转 $R_{\Delta}^{t}$ 将视线方向旋转到第 $t-1$ 帧：
+$$
+\overrightarrow{view}_{c}^{t-1} = (R_{\Delta}^{t})^{-1}\cdot\overrightarrow{view}_{c}^{t}.
+$$
+由于 $R_{\Delta GV}^{t}$ 仅绕重力轴旋转，可通过将两帧视线方向投影到 $xz$ 平面并计算夹角得到。得到所有 $\{R_{\Delta GV}^{t}\}$ 后，将所有帧的朝向滚动到第一帧的 GV 坐标系：
+$$
+\Gamma_{w}^{t} = \begin{cases}
+\Gamma_{GV}^{0}, & t = 0, \\
+\prod_{i=1}^{t}R_{\Delta GV}^{i}\cdot\Gamma_{GV}^{t}, & t > 0.
+\end{cases}
+$$
+该式同样适用于静态相机，此时 $R_{\Delta GV}^{t}$ 为单位矩阵。全局平移仍按上式累加得到。
+
+#### 2.3 网络设计
+
+网络输入包括四类特征：人体边界框、二维关键点、图像特征以及相对相机旋转。这些特征经各自的 MLP 映射到相同维度后逐元素相加，得到每帧的 token $f_{\mathrm{token}}^{t}\in\mathbb{R}^{512}$。Token 序列输入一个 Relative Transformer，其中采用旋转位置编码（RoPE）来注入相对位置信息。RoPE 下的自注意力输出为
+$$
+\begin{aligned}
+\mathbf{o}^{t} &= \sum_{i\in T}\mathrm{Softmax}\left(\mathbf{a}^{ts}\right)^{i}\mathbf{W}_{v}f_{\mathrm{token}}^{i}, \\
+a^{ts} &= (\mathbf{W}_{q}f_{\mathrm{token}}^{t})^{\top}\mathbf{R}\left(\mathbf{p}^{s}-\mathbf{p}^{t}\right)(\mathbf{W}_{k}f_{\mathrm{token}}^{s}), 
+\end{aligned}
+$$
+其中 $\mathbf{R}(\cdot)$ 为旋转编码矩阵，$\mathbf{p}^{t}$ 为时间索引。推理时引入注意力掩码
+$$
+m^{ts} = \begin{cases}
+0, & \text{if } -L < t-s < L, \\
+-\infty, & \text{otherwise}, 
+\end{cases}
+$$
+使得每个 token 仅关注相对距离在 $L$ 以内的 token，从而可泛化到任意长序列而无需滑动窗口。
+
+Transformer 输出经多任务 MLP 预测多个目标：弱透视相机参数 $cw$、相机坐标系人体朝向 $\Gamma_{c}$、SMPL 局部姿态 $\theta$、形状 $\beta$、关节静止概率 $p_{j}$、GV 坐标系朝向 $\Gamma_{GV}$ 以及根速度 $v_{root}$。相机坐标系下的人体运动通过 CLIFF 方法从弱透视转换到全透视。世界坐标系下的人体运动则按上述全局轨迹恢复方法得到。
+
+后处理阶段，利用预测的手、脚尖、脚跟的静止概率，逐帧更新全局平移，使静止关节尽可能保持空间固定；随后计算各关节的精细静止位置，并通过逆运动学求解局部姿态，以减轻脚滑等物理不合理现象。
+
+<!-- ### 三、训练流程
+
+训练时，首先对输入视频进行预处理，提取边界框、二维关键点、图像特征和相对相机旋转，并融合为每帧 token。Token 序列输入 Relative Transformer，输出多任务预测结果。损失函数包括：对除静止概率外的所有预测目标使用均方误差损失，对静止概率使用二元交叉熵损失；此外还对三维关节、二维关节、顶点、相机坐标系平移以及世界坐标系平移施加 L2 损失。模型在 AMASS、BEDLAM、H36M 和 3DPW 的混合数据集上从零开始训练，训练序列长度设为 $L=120$，批量大小为 256，在两张 RTX 4090 上训练约 13 小时。
+
+推理时，给定单目视频，先进行预处理，然后网络并行预测每帧的中间表示。根据相机是否运动，分别采用静态或动态全局轨迹恢复算法，将 GV 坐标系下的朝向与根速度转换为世界坐标系下的全局轨迹。最后利用静止概率进行后处理，优化全局平移并求解局部姿态，输出最终的重力感知世界坐标系人体运动。
+
+### 四、伪代码
+
+<pre class="pseudocode">
+\documentclass{article}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{bm}
+
+\begin{document}
+
+\begin{algorithm}
+\caption{GVHMR 推理流程}
+\begin{algorithmic}[1]
+\Require 单目视频 $\{I^t\}_{t=0}^T$
+\Ensure 世界坐标系下的人体运动 $\{\theta^t, \beta, \Gamma_w^t, \tau_w^t\}$
+\State 预处理：提取边界框、二维关键点、图像特征、相对相机旋转 $R_{\Delta}^t$
+\State 将特征融合为每帧 token $f_{\mathrm{token}}^t$
+\State 使用 Relative Transformer 与 RoPE 处理 token 序列
+\State 经多任务 MLP 预测 $\Gamma_c^t, \theta^t, \beta, \Gamma_{GV}^t, v_{root}^t, p_j^t, cw^t$
+\State 由 $cw^t$ 恢复相机坐标系平移 $\tau_c^t$
+\If{相机静止}
+    \State $\Gamma_w^t \leftarrow \Gamma_{GV}^t$
+    \State $\tau_w^t \leftarrow \sum_{i=0}^{t-1} \Gamma_w^i v_{root}^i$
+\Else
+    \For{每一帧 $t$}
+        \State $R_{c2gv}^t \leftarrow \Gamma_{GV}^t \cdot (\Gamma_c^t)^{-1}$
+        \State $\overrightarrow{view}_{GV}^t \leftarrow R_{c2gv}^t \cdot [0,0,1]^T$
+        \State $\overrightarrow{view}_{c}^{t-1} \leftarrow (R_{\Delta}^t)^{-1} \cdot \overrightarrow{view}_{c}^{t}$
+        \State 将 $\overrightarrow{view}^{t-1}$ 与 $\overrightarrow{view}^t$ 投影到 $xz$ 平面，计算 $R_{\Delta GV}^t$
+    \EndFor
+    \State $\Gamma_w^0 \leftarrow \Gamma_{GV}^0$
+    \For{$t=1,\dots,T$}
+        \State $\Gamma_w^t \leftarrow \prod_{i=1}^{t} R_{\Delta GV}^i \cdot \Gamma_{GV}^t$
+    \EndFor
+    \State $\tau_w^t \leftarrow \sum_{i=0}^{t-1} \Gamma_w^i v_{root}^i$
+\EndIf
+\State 利用静止概率 $p_j^t$ 更新全局平移 $\tau_w^t$
+\State 通过逆运动学求解局部姿态 $\theta^t$，减轻脚滑
+\State \Return $\{\theta^t, \beta, \Gamma_w^t, \tau_w^t\}$
+\end{algorithmic}
+\end{algorithm}
+\end{document}
+</pre> -->
 
 ## GMR 原理与方法
 
@@ -68,25 +282,3 @@ flowchart TD
     E --> F
     F --> G
 ```
-
-### 演示结果
-
-1. 倒着走
-
-<video width="1080" controls src="../public/projects/amp/unitree_g1_B4_-_Stand_to_Walk_backwards_stageii.mp4"></video>
-
-2. 右转弯跑
-
-<video width="1080" controls src="../public/projects/amp/unitree_g1_C14_-__run_turn_right__(90)_stageii.mp4"></video>
-
-3. 不同方向跑
-
-<video width="1080" controls src="../public/projects/amp/unitree_g1_C17_-_run_change_direction_stageii.mp4"></video>
-
-4. 跳步
-
-<video width="1080" controls src="../public/projects/amp/unitree_g1_Run_C25_-_quick_side_step_right_stageii.mp4"></video>
-
-5. 网球发球
-
-<video width="1080" controls src="../public/projects/amp/unitree_g1_hmr4d_results.mp4"></video>

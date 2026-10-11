@@ -325,6 +325,36 @@ watch(() => props.projectId, loadContent)
   display: block;
 }
 
+/* Video grid (2 rows × 3 columns) */
+.article__content :deep(.video-grid) {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+  margin: 24px 0;
+}
+
+.article__content :deep(.video-grid figure) {
+  margin: 0;
+}
+
+.article__content :deep(.video-grid video) {
+  margin: 0;
+  width: 100%;
+}
+
+.article__content :deep(.video-grid figcaption) {
+  margin-top: 8px;
+  font-size: 13px;
+  color: #666;
+  text-align: center;
+}
+
+@media (max-width: 640px) {
+  .article__content :deep(.video-grid) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
 /* Tables */
 .article__content :deep(table) {
   width: 100%;

@@ -71,9 +71,9 @@ const projects: Project[] = [
     media: {type: 'video', src: '/projects/amp/amp-demo.mp4'}
   },
   {
-    title: ' GMR',
+    title: 'GVHMR+GMR 重定向',
     description:
-      'GMR',
+      '使用 GVHMR 和 GMR 将人类行走, 跑到和跳舞等视频重定向, 用于后续如 AMP, SMP 和 Beyondmimic 等算法训练.',
     imageColor: 'linear-gradient(135deg, #4a90d9 0%, #67b8f7 50%, #a0d2ff 100%)',
     link: '/projects/gmr',
     media: {type: 'video', src: '/projects/amp/unitree_g1_C17_-_run_change_direction_stageii.mp4'}
@@ -84,7 +84,7 @@ const projects: Project[] = [
       'BeyondMimic: 一个基于引导扩散的现实世界框架, 旨在从人类动作中学习并实现多样化, 自然的人形机器人全身控制.',
     imageColor: 'linear-gradient(135deg, #2ecc71 0%, #58d68d 50%, #82e0aa 100%)',
     link: '/projects/beyondmimic',
-    media: {type: 'video', src: '/projects/P2_play.mp4'}
+    media: {type: 'video', src: '/projects/beyondmimic/beyondmimic-stage1-sim2sim.mp4'}
   },
   {
     title: ' PID-DE-MPC',
@@ -97,7 +97,7 @@ const projects: Project[] = [
   {
     title: '陆吾',
     description:
-      '使用 IsaacLab 来实现 Cyberdog2 的四足机器人 Locomotion 控制, 通过强化学习来提升四足机器人的运动能力.',
+      '使用 Mjlab 来实现 Cyberdog2 的四足机器人 Locomotion 控制, 通过强化学习来提升四足机器人的运动能力.',
     imageColor: 'linear-gradient(135deg, #7b4fbf 0%, #9b7fd4 50%, #c4b0e8 100%)',
     link: '/projects/luwu',
     media: {type: 'video', src: '/projects/luwu/cyberdog2-flat.mp4'}
@@ -108,6 +108,7 @@ const projects: Project[] = [
       'Score-Matching Motion Priors（SMP）是一种可重用、模块化的运动先验构造方法，其核心思想是利用预训练的运动扩散模型，通过分数蒸馏采样（Score Distillation Sampling, SDS）将其转化为强化学习中的风格奖励函数。',
     imageColor: 'linear-gradient(135deg, #4a90d9 0%, #67b8f7 50%, #a0d2ff 100%)',
     link: '/projects/smp',
+    media: {type: 'video', src: '/projects/smp/smp-sim2sim.mp4'}
   },
   {
     title: 'Humanoid',

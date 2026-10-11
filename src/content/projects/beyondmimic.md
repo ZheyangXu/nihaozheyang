@@ -1,6 +1,43 @@
 # BeyondMimic
 
-<video width="1080" controls src="../public/projects/P2_play.mp4"></video>
+## 视频演示
+
+### BeyondMimic 第一阶段：运动跟踪策略训练(sim2sim)
+
+<video width="1080" controls src="../public/projects/beyondmimic/beyondmimic-stage1-sim2sim.mp4"></video>
+
+### BeyondMimic 第二阶段：潜在扩散模型训练与引导推理(sim2sim)
+
+<video width="1080" controls src="../public/projects/beyondmimic/beyondmimic-stage2-sim2sim.mp4"></video>
+
+### 第一阶段 play 演示视频
+
+<div class="video-grid">
+<figure>
+<video width="100%" controls src="../public/projects/beyondmimic/beyondmimic-duochanbu.mp4"></video>
+<figcaption>跺颤步</figcaption>
+</figure>
+<figure>
+<video width="100%" controls src="../public/projects/beyondmimic/beyondmimic-gouxiongduosuomao.mp4"></video>
+<figcaption>狗熊哆嗦毛</figcaption>
+</figure>
+<figure>
+<video width="100%" controls src="../public/projects/beyondmimic/beyondmimic-langzitiqiu.mp4"></video>
+<figcaption>浪子踢球</figcaption>
+</figure>
+<figure>
+<video width="100%" controls src="../public/projects/beyondmimic/beyondmimic-shanshenbu.mp4"></video>
+<figcaption>闪身步</figcaption>
+</figure>
+<figure>
+<video width="100%" controls src="../public/projects/beyondmimic/beyondmimic-tibeigu.mp4"></video>
+<figcaption>提背鼓</figcaption>
+</figure>
+<figure>
+<video width="100%" controls src="../public/projects/beyondmimic/beyondmimic-yaotouhuangnao.mp4"></video>
+<figcaption>摇头晃脑</figcaption>
+</figure>
+</div>
 
 BeyondMimic 的核心思想在于将人形机器人控制分解为两个相互衔接的阶段：第一阶段通过可扩展的强化学习运动跟踪，从无标签人类运动数据中习得大量具有人类敏捷性与自然性的原子技能；第二阶段将已习得的运动跟踪策略蒸馏到潜在空间，并在该潜在空间上训练状态—动作扩散模型，从而利用扩散模型对数据分布梯度的建模能力，在推理阶段通过分类器引导实现在线任务优化。由此，系统无需针对下游任务重新训练或微调，即可完成速度跟踪、路点导航、摇杆遥操作、运动补间与避障等未见任务，并在真实人形机器人上实现零样本部署。
 
@@ -306,7 +343,3 @@ $$
 ![alt text](../../../public/P2_scalars_mean_episode_length.png)
 
 ![alt text](../../../public/P2_scalars_error_joint_pos.png)
-
-## 演示视频
-
-<video width="1080" controls src="../public/projects/P2_play.mp4"></video>

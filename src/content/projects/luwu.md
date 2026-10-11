@@ -12,6 +12,8 @@
 
 ## 真机部署
 
+### Flat
+
 Gazebo
 
 <video width="1080" controls src="../public/projects/luwu/cyberdog2-gazebo.mp4"></video>
@@ -20,6 +22,9 @@ Gazebo
 
 <video controls src="../public/projects/luwu/cyberdog2-flat.mp4" title="Title"></video>
 
+### Rough
+
+<video controls src="../public/projects/luwu/cyberdog2-gazebo-rough.mp4" title="Title"></video>
 
 ## 四足速度任务说明（Observations / Actions / Rewards）
 

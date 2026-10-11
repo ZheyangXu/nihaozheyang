@@ -1,5 +1,40 @@
 # SMP
 
+## 视频演示
+
+### Sim2sim
+
+<video width="100%" controls src="../public/projects/smp/smp-sim2sim.mp4"></video>
+
+### Play 演示视频
+
+<div class="video-grid">
+<figure>
+<video width="100%" controls src="../public/projects/smp/smp-duochanbu.mp4"></video>
+<figcaption>跺颤步</figcaption>
+</figure>
+<figure>
+<video width="100%" controls src="../public/projects/smp/smp-gouxiongduosuomao.mp4"></video>
+<figcaption>狗熊哆嗦毛</figcaption>
+</figure>
+<figure>
+<video width="100%" controls src="../public/projects/smp/smp-langzitiqiu.mp4"></video>
+<figcaption>浪子踢球</figcaption>
+</figure>
+<figure>
+<video width="100%" controls src="../public/projects/smp/smp-shanshenbu.mp4"></video>
+<figcaption>闪身步</figcaption>
+</figure>
+<figure>
+<video width="100%" controls src="../public/projects/smp/smp-tibeigu.mp4"></video>
+<figcaption>提背鼓</figcaption>
+</figure>
+<figure>
+<video width="100%" controls src="../public/projects/smp/smp-yaotouhuangnao.mp4"></video>
+<figcaption>摇头晃脑</figcaption>
+</figure>
+</div>
+
 ## 一、基本原理
 
 Score-Matching Motion Priors（SMP）是一种可重用、模块化的运动先验构造方法，其核心思想是利用预训练的运动扩散模型，通过分数蒸馏采样（Score Distillation Sampling, SDS）将其转化为强化学习中的风格奖励函数。给定一个非结构化的参考运动数据集，首先训练一个与任务和策略无关的运动扩散模型，该模型学习参考运动数据的分布 $p(\mathbf{x})$。扩散模型通过前向扩散过程逐步加噪，并训练去噪网络 $f$ 预测所加噪声，其训练目标为
