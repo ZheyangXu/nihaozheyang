@@ -340,6 +340,6 @@ $$
 
 ## 关键指标
 
-![alt text](../../../public/P2_scalars_mean_episode_length.png)
+![alt text](../public/projects/beyondmimic/P2_scalars_mean_episode_length.png)
 
-![alt text](../../../public/P2_scalars_error_joint_pos.png)
+![alt text](../public/projects/beyondmimic/P2_scalars_error_joint_pos.png)
