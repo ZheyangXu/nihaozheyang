@@ -40,7 +40,7 @@ jobs:
           key: ${{ secrets.SSH_KEY }}
           port: ${{ secrets.SSH_PORT }}
           # upload all files under dist to a temporary folder on the server
-          source: "dist/**"
+          source: "dist/index.html,dist/assets/**"
           target: "/tmp/nihaozheyang_build"
 
       - name: Deploy on remote server and reload nginx
