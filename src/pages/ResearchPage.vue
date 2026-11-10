@@ -63,6 +63,14 @@ const projects: Project[] = [
     media: {type: 'video', src: '/projects/ame/g1-stacks-ame2.mp4'}
   },
   {
+    title: 'BeyondMimic',
+    description:
+      'BeyondMimic: 一个基于引导扩散的现实世界框架, 旨在从人类动作中学习并实现多样化, 自然的人形机器人全身控制.',
+    imageColor: 'linear-gradient(135deg, #2ecc71 0%, #58d68d 50%, #82e0aa 100%)',
+    link: '/projects/beyondmimic',
+    media: {type: 'video', src: '/projects/beyondmimic/shanshenbu_real.mp4'}
+  },
+  {
     title: 'AMP',
     description:
       'AMP(Adversarial Motion Priors, 对抗性运动先验) 是一种基于 GAN 和强化学习RL的运动控制框架, 核心是通过对抗模仿从非结构化运动数据中学习风格特征, 让物理模拟角色或真实机器人在完成任务的同时, 呈现自然, 风格化的运动.',
@@ -78,14 +86,7 @@ const projects: Project[] = [
     link: '/projects/gmr',
     media: {type: 'video', src: '/projects/amp/unitree_g1_C17_-_run_change_direction_stageii.mp4'}
   },
-  {
-    title: 'BeyondMimic',
-    description:
-      'BeyondMimic: 一个基于引导扩散的现实世界框架, 旨在从人类动作中学习并实现多样化, 自然的人形机器人全身控制.',
-    imageColor: 'linear-gradient(135deg, #2ecc71 0%, #58d68d 50%, #82e0aa 100%)',
-    link: '/projects/beyondmimic',
-    media: {type: 'video', src: '/projects/beyondmimic/beyondmimic-stage1-sim2sim.mp4'}
-  },
+
   {
     title: ' PID-DE-MPC',
     description:
