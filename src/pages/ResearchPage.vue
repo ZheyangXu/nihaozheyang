@@ -71,6 +71,14 @@ const projects: Project[] = [
     media: {type: 'video', src: '/projects/beyondmimic/shanshenbu_real.mp4'}
   },
   {
+    title: 'SMP',
+    description:
+      'Score-Matching Motion Priors（SMP）是一种可重用、模块化的运动先验构造方法，其核心思想是利用预训练的运动扩散模型，通过分数蒸馏采样（Score Distillation Sampling, SDS）将其转化为强化学习中的风格奖励函数。',
+    imageColor: 'linear-gradient(135deg, #4a90d9 0%, #67b8f7 50%, #a0d2ff 100%)',
+    link: '/projects/smp',
+    media: {type: 'video', src: '/projects/smp/gouxiongduosuomao_real.mp4'}
+  },
+  {
     title: 'AMP',
     description:
       'AMP(Adversarial Motion Priors, 对抗性运动先验) 是一种基于 GAN 和强化学习RL的运动控制框架, 核心是通过对抗模仿从非结构化运动数据中学习风格特征, 让物理模拟角色或真实机器人在完成任务的同时, 呈现自然, 风格化的运动.',

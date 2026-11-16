@@ -2,6 +2,10 @@
 
 ## 视频演示
 
+## 真机
+
+<video width="1080" controls src="../public/projects/smp/gouxiongduosuomao_real.mp4"></video>
+
 ### Sim2sim
 
 <video width="100%" controls src="../public/projects/smp/smp-sim2sim.mp4"></video>
