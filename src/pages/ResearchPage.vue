@@ -55,20 +55,12 @@ interface Project {
 
 const projects: Project[] = [
   {
-    title: 'AME',
-    description:
-      'AME 算法通过基于注意力的地图编码架构来处理高程地图以提取地形感知特征, 用于控制决策, 来提升机器人在复杂地形上的运动能力.',
-    imageColor: 'linear-gradient(135deg, #e8734a 0%, #f59e6b 50%, #f7c9a8 100%)',
-    link: '/projects/ame',
-    media: {type: 'video', src: '/projects/ame/g1-stacks-ame2.mp4'}
-  },
-  {
     title: 'BeyondMimic',
     description:
       'BeyondMimic: 一个基于引导扩散的现实世界框架, 旨在从人类动作中学习并实现多样化, 自然的人形机器人全身控制.',
     imageColor: 'linear-gradient(135deg, #2ecc71 0%, #58d68d 50%, #82e0aa 100%)',
     link: '/projects/beyondmimic',
-    media: {type: 'video', src: '/projects/beyondmimic/shanshenbu_real.mp4'}
+    media: {type: 'video', src: '/projects/beyondmimic/gouxiongduosuomao_real.mp4'}
   },
   {
     title: 'SMP',
@@ -76,7 +68,15 @@ const projects: Project[] = [
       'Score-Matching Motion Priors（SMP）是一种可重用、模块化的运动先验构造方法，其核心思想是利用预训练的运动扩散模型，通过分数蒸馏采样（Score Distillation Sampling, SDS）将其转化为强化学习中的风格奖励函数。',
     imageColor: 'linear-gradient(135deg, #4a90d9 0%, #67b8f7 50%, #a0d2ff 100%)',
     link: '/projects/smp',
-    media: {type: 'video', src: '/projects/smp/gouxiongduosuomao_real.mp4'}
+    media: {type: 'video', src: '/projects/smp/shanshenbu_real.mp4'}
+  },
+  {
+    title: 'AME',
+    description:
+      'AME 算法通过基于注意力的地图编码架构来处理高程地图以提取地形感知特征, 用于控制决策, 来提升机器人在复杂地形上的运动能力.',
+    imageColor: 'linear-gradient(135deg, #e8734a 0%, #f59e6b 50%, #f7c9a8 100%)',
+    link: '/projects/ame',
+    media: {type: 'video', src: '/projects/ame/g1-stacks-ame2.mp4'}
   },
   {
     title: 'AMP',

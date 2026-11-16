@@ -4,7 +4,7 @@
 
 ## 真机
 
-<video width="1080" controls src="../public/projects/beyondmimic/shanshenbu_real.mp4"></video>
+<video width="1080" controls src="../public/projects/beyondmimic/gouxiongduosuomao_real.mp4"></video>
 
 ### BeyondMimic 第一阶段：运动跟踪策略训练(sim2sim)
 
