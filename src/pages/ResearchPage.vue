@@ -112,14 +112,6 @@ const projects: Project[] = [
     media: {type: 'video', src: '/projects/luwu/cyberdog2-flat.mp4'}
   },
   {
-    title: 'SMP',
-    description:
-      'Score-Matching Motion Priors（SMP）是一种可重用、模块化的运动先验构造方法，其核心思想是利用预训练的运动扩散模型，通过分数蒸馏采样（Score Distillation Sampling, SDS）将其转化为强化学习中的风格奖励函数。',
-    imageColor: 'linear-gradient(135deg, #4a90d9 0%, #67b8f7 50%, #a0d2ff 100%)',
-    link: '/projects/smp',
-    media: {type: 'video', src: '/projects/smp/smp-sim2sim.mp4'}
-  },
-  {
     title: 'Humanoid',
     description:
       '人形机器人项目合集展示.',
