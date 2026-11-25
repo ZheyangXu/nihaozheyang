@@ -56,6 +56,12 @@ const router = createRouter({
       component: () => import("../pages/ProjectDetail.vue"),
       props: { projectId: "humanoid" },
     },
+    {
+      path: "/projects/hiking",
+      name: "hiking",
+      component: () => import("../pages/ProjectDetail.vue"),
+      props: { projectId: "hiking" },
+    },
   ],
 });
 
