@@ -94,14 +94,13 @@ const projects: Project[] = [
     link: '/projects/gmr',
     media: {type: 'video', src: '/projects/amp/unitree_g1_C17_-_run_change_direction_stageii.mp4'}
   },
-
   {
-    title: ' PID-DE-MPC',
+    title: 'Hiking in the Wild Cyberdog2',
     description:
-      '通过 PID 事件驱动触发的减少 MPC 中的 QP 求解次数, 来提升 MPC 的运行速度. 同时通过抗扰动模块来提升机器人的抗扰动能力.',
-    imageColor: 'linear-gradient(135deg, #e74c3c 0%, #f0736a 50%, #f5a097 100%)',
-    link: '/projects/mpc',
-    media: {type: 'video', src: '/projects/mpc/ex11_pid_de_mpc.mp4'}
+      '复现人形机器人中的 Hiking in the Wild 项目到 Cyberdog2 的四足机器人视觉 Locomotion 控制, 通过强化学习和深度视觉来提升四足机器人的运动能力.',
+    imageColor: 'linear-gradient(135deg, #7b4fbf 0%, #9b7fd4 50%, #c4b0e8 100%)',
+    link: '/projects/hiking',
+    media: {type: 'video', src: '/projects/luwu/hiking_in_the_wild_play.mp4'}
   },
   {
     title: '陆吾',
@@ -110,6 +109,14 @@ const projects: Project[] = [
     imageColor: 'linear-gradient(135deg, #7b4fbf 0%, #9b7fd4 50%, #c4b0e8 100%)',
     link: '/projects/luwu',
     media: {type: 'video', src: '/projects/luwu/cyberdog2-flat.mp4'}
+  },
+  {
+    title: ' PID-DE-MPC',
+    description:
+      '通过 PID 事件驱动触发的减少 MPC 中的 QP 求解次数, 来提升 MPC 的运行速度. 同时通过抗扰动模块来提升机器人的抗扰动能力.',
+    imageColor: 'linear-gradient(135deg, #e74c3c 0%, #f0736a 50%, #f5a097 100%)',
+    link: '/projects/mpc',
+    media: {type: 'video', src: '/projects/mpc/ex11_pid_de_mpc.mp4'}
   },
   {
     title: 'Humanoid',
